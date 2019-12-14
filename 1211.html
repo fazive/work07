@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>轮播图</title>
+  <link rel="stylesheet" type="text/css" href="1211.css">
+  </link>
+</head>
+
+<body>
+  <div class="hint" id="hint">
+    <span><img class="img" src="images/a15.png" alt="" style="margin-left: 50px;"></span>
+    <span class="alert" id="alert" style="margin-left:1200px; color:red;">[温馨提示]最近不少不法分子在网上骗人，请大家注意!!!</span>
+  </div>
+  <div class="box" id="box">
+    <div class="slider" id="slider">
+      <div class="slide"><img src="images/b5.png" alt=""></div>
+      <div class="slide"><img src="images/b1.png" alt=""></div>
+      <div class="slide"><img src="images/b2.png" alt=""></div>
+      <div class="slide"><img src="images/b3.png" alt=""></div>
+      <div class="slide"><img src="images/b4.png" alt=""></div>
+      <div class="slide"><img src="images/b5.png" alt=""></div>
+      <div class="slide"><img src="images/b1.png" alt=""></div>
+
+    </div>
+      <span id="left"><</span> 
+      <span id="right">></span>
+      <ul class="nav" id="nav">
+        <li class="active">1</li>
+        <li>2</li>
+        <li>3</li>
+        <li>4</li>
+        <li>5</li>
+      </ul>
+    </div>
+</body>
+<script>
+  var box = document.getElementById("box");
+  var list = document.getElementById("nav").children;
+  var slider = document.getElementById("slider");
+  var left = document.getElementById("left");
+  var right = document.getElementById("right");
+  var alert = document.getElementById("alert");
+  var index = 1;
+  var timer;
+  var moving = false;
+  //提示滑动效果
+  window.onload = function () {
+    var intervalId = setInterval(function () {
+      var marginLeft = alert.style.marginLeft;
+      alert.style.marginLeft = (parseInt(marginLeft) - 1) + "px";
+      if (parseInt(marginLeft) == 10) {
+        clearInterval(intervalId);
+        alert.style.marginLeft = 1000 + "px";
+        window.onload();
+      }
+    }, 30)
+
+  }
+  /*实现轮播*/
+  //点击按钮切换背景
+  function picChange() {
+  for (var i = 0; i < list.length; i++) {
+    list[i].className = " ";
+  }
+  if (index === 6) {
+    list[0].className = "active";
+  } else if (index == 0) {
+    list[4].className = "active";
+  } else {
+    list[index - 1].className = "active";
+     }
+  }
+
+  //如果当前位置在第七图仍点击>按钮则跳转到第二图
+  function picNext() {
+    if (!moving) {
+      moving = true;
+      index++;
+      picChange();
+      animate(slider, { left: -1200 * index }, function () {
+        if (index == 6) {
+          slider.style.left = "-1200px";
+          index = 1;
+        }
+        moving = false;
+      });
+    }
+  }
+  //如果当前位置在第一图仍点击<则跳转到第六图
+  function picPre() {
+    if (!moving) {
+      moving = true;
+      index--;
+      picChange();
+      animate(slider, { left: -1200 * index }, function () {
+        if (index == 0) {
+          slider.style.left = "-6000px";
+          index = 5;
+        }
+        moving = false;
+      });
+    }
+  }
+  var timer = setInterval(picNext, 3000);
+  //鼠标划入时清除
+  box.onmouseover = function () {
+    animate(left, { opacity: 50 });
+    animate(right, { opacity: 50 });
+    clearInterval(timer);
+  }
+  //鼠标划出时进行
+  box.onmouseout = function () {
+    animate(left, { opacity: 0 });
+    animate(right, { opacity: 0 });
+    timer = setInterval(picNext, 3000);
+  }
+  right.onclick = picNext;
+  left.onclick = picPre;
+  //点击按钮进入到对应的图片
+  for (var i = 0; i < list.length; i++) {
+    list[i].idx = i;
+    list[i].onclick = function () {
+      index = this.idx + 1;
+      picChange();
+      animate(slider, { left: -1200 * index })
+    }
+  }
+  function getStyle(obj, attr) {
+
+    if (obj.currentStyle) {
+
+      return obj.currentStyle[attr];
+
+    } else {
+
+      return getComputedStyle(obj, null)[attr];
+
+    }
+
+  }
+
+  function animate(obj, json, callback) {
+
+    clearInterval(obj.timer);
+
+    obj.timer = setInterval(function () {
+
+      var isStop = true;
+
+      for (var attr in json) {
+
+        var now = 0;
+
+        if (attr == 'opacity') {
+
+          now = parseInt(getStyle(obj, attr) * 100);
+
+        } else {
+
+          now = parseInt(getStyle(obj, attr));
+
+        }
+
+        var speed = (json[attr] - now) / 8;
+
+        speed = speed > 0 ? Math.ceil(speed) : Math.floor(speed);
+
+        var cur = now + speed;
+
+        if (attr == 'opacity') {
+
+          obj.style[attr] = cur / 100;
+
+        } else {
+
+          obj.style[attr] = cur + 'px';
+
+        }
+
+        if (json[attr] !== cur) {
+
+          isStop = false;
+
+        }
+
+      }
+
+      if (isStop) {
+
+        clearInterval(obj.timer);
+
+        callback && callback();
+
+      }
+
+    }, 30)
+
+  }
+</script>
+
+</html>
